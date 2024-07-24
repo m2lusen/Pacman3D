@@ -185,7 +185,7 @@ float distance(float ax, float ay, float bx, float by) {
 
 // fix based on original C
 
-void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo, float& distanceT, int& ray, int& mx, int& my, int& mp, int& dof, float originX, float originY, int& infLoopCheck, float& distanceP) {
+void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo, float& distanceT, int& ray, int& mx, int& my, int& mp, int& dof, float originX, float originY, int& infLoopCheck, float& distanceP, int& verticalHorizontal) {
     float portalX, portalY, portalA;
     int recursiveCallCheck = 0;
 
@@ -272,7 +272,7 @@ void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo
             	infLoopCheck+=1;
             	float newX = 531;            	
             	float distanceP =  distance(originX, originY, rayX, rayY);            	
-            	rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, newX, portalY, infLoopCheck, distanceP);
+            	rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, newX, portalY, infLoopCheck, distanceP, verticalHorizontal);
             }
         } else if (mp == 419){
         	portalX = rayX;
@@ -283,7 +283,7 @@ void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo
             	infLoopCheck+=1;
             	float newX = 21;
             	float distanceP =  distance(originX, originY, rayX, rayY);
-            	rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, newX, portalY, infLoopCheck, distanceP);
+            	rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, newX, portalY, infLoopCheck, distanceP, verticalHorizontal);
             }
 		}
     }
@@ -301,18 +301,20 @@ void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo
 		   rayX = verticalX;
 		   rayY = verticalY;
 		   distanceT=(distanceV + distanceP) * cos(playerAngle-rayAngle);
+		   verticalHorizontal = 0; // horizontal wall
 		}
 		if (distanceH < distanceV) {
 			rayX = horizontalX;
 			rayY = horizontalY;
 			distanceT=(distanceH + distanceP) * cos(playerAngle-rayAngle);
+			verticalHorizontal = 1; // vertical wall
 		}
 	}
 
 }
 
 void drawRays2d() {
-    int ray, mx, my, mp, dof, infLoopCheck = 0;
+    int ray, mx, my, mp, dof, infLoopCheck = 0, verticalHorizontal;
     float rayX, rayY, rayAngle, xo, yo, distanceT = 0, distanceP = 0;
     float originX = playerX, originY = playerY;
     rayAngle = playerAngle - DEGREE_FROM_RADIANS * 30;
@@ -324,7 +326,7 @@ void drawRays2d() {
     }
 
     for (ray = 0; ray < 120; ray++) {
-        rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, originX, originY, infLoopCheck, distanceP);
+        rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, originX, originY, infLoopCheck, distanceP, verticalHorizontal);
 
         // Draw rays
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for rays
@@ -332,16 +334,23 @@ void drawRays2d() {
                            static_cast<int>(rayX), static_cast<int>(rayY));
 
         // Draw 3D projection
+		float cAngle = playerAngle - rayAngle;
+		if (cAngle < 0) cAngle += 2 * PI;
+		if (cAngle > 2 * PI) cAngle -= 2 * PI; // Calculate the cosine angle to prevent fish-eye effect
+		float lineH = (mapSize * 600) / distanceT; // Calculate the corrected line height
+		if (lineH > 600) lineH = 600;
+		float lineO = 300 - lineH / 2; // Calculate the line offset
 
-        float cAngle = playerAngle - rayAngle; // cosine angle, used to stop fish-eye effect
-        if (cAngle < 0) cAngle += 2 * PI;
-        if (cAngle > 2 * PI) cAngle -= 2 * PI;
-        float lineH = (mapSize * 600) / distanceT; // line height
-        if (lineH > 600) lineH = 600;
-        float lineO = (300) - lineH / 2; // line Offset
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White color for 3D projection
-        SDL_RenderDrawLine(renderer, ray * 4 + (mapX * mapSize), static_cast<int>(lineO),
-                           ray * 4 + (mapX * mapSize), static_cast<int>(lineH + lineO));
+		if (verticalHorizontal == 0){ // Set the color 
+			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		} else {
+			SDL_SetRenderDrawColor(renderer, 0, 0, 230, 255);
+		}
+
+		int leftX = ray * 4 + (mapX * mapSize) - 4;
+		int rightX = ray * 4 + (mapX * mapSize) + 4;
+		SDL_Rect rect = {leftX, static_cast<int>(lineO), rightX - leftX, static_cast<int>(lineH)};
+		SDL_RenderFillRect(renderer, &rect);
 
         rayAngle += DEGREE_FROM_RADIANS / 2; // Increase angle
         if (rayAngle < 0) {
