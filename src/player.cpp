@@ -52,7 +52,7 @@ void updatePlayerPosition() {
     int initialPlayerY_sub_yOffset = (playerY - yOffset) / mapSize;
 
     if (wPressed) {
-        if (mapW[initialPlayerY * mapX + initialPlayerX_add_xOffset] == 0) {
+        if (mapW[initialPlayerY * mapX + initialPlayerX_add_xOffset] == 0 || playerX >=549) { // exception for passing right edge of map
             playerX += playerDX * deltaTime;
         }
         if (mapW[initialPlayerY_add_yOffset * mapX + initialPlayerX] == 0) {
@@ -60,7 +60,7 @@ void updatePlayerPosition() {
         }
     }
     if (sPressed) {
-        if (mapW[initialPlayerY * mapX + initialPlayerX_sub_xOffset] == 0) {
+        if (mapW[initialPlayerY * mapX + initialPlayerX_sub_xOffset] == 0 || playerX >=549) { // exception for passing right edge of map
             playerX -= playerDX * deltaTime;
         }
         if (mapW[initialPlayerY_sub_yOffset * mapX + initialPlayerX] == 0) {
@@ -68,10 +68,9 @@ void updatePlayerPosition() {
         }
     }
 
-    int currentSquare = initialPlayerY * mapX + initialPlayerX;
-    if (currentSquare == 392 && playerX <= 20) {
-        playerX = 539;
-    } else if (currentSquare == 419 && playerX >= 530) {
-        playerX = 21;
+    if (playerX <= 0) {
+        playerX = 559;
+    } else if ( playerX >= 560) {
+        playerX = 1;
     }
 }

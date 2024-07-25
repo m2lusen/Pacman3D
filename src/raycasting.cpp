@@ -7,9 +7,7 @@ float distance(float ax, float ay, float bx, float by) {
     return std::sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
 }
 
-void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo, float& distanceT, int& ray, int& mx, int& my, int& mp, int& dof, float originX, float originY, int& infLoopCheck, float& distanceP, int& verticalHorizontal) {
-    float portalX, portalY, portalA;
-    int recursiveCallCheck = 0;
+void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo, float& distanceT, int& ray, int& mx, int& my, int& mp, int& dof, float originX, float originY, int& verticalHorizontal, int& portal) {
 
     // Horizontal
     dof = 0;
@@ -45,7 +43,7 @@ void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo
         } else {
             rayX += xo;
             rayY += yo;
-            (dof)++;
+            dof++;
         }
     }
 
@@ -84,60 +82,34 @@ void rayHitMaths(float& rayX, float& rayY, float& rayAngle, float& xo, float& yo
             rayY += yo;
             dof++;
         }
-
-		if (mp == 392) {
-            portalX = rayX;
-            portalY = rayY;
-            portalA = rayAngle;            
-            if (infLoopCheck==0){
-            	recursiveCallCheck = 1;
-            	infLoopCheck+=1;
-            	float newX = 531;            	
-            	float distanceP =  distance(originX, originY, rayX, rayY);            	
-            	rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, newX, portalY, infLoopCheck, distanceP, verticalHorizontal);
-            }
-        } else if (mp == 419){
-        	portalX = rayX;
-            portalY = rayY;
-            portalA = rayAngle;
-            if (infLoopCheck==0){
-            	recursiveCallCheck = 1;
-            	infLoopCheck+=1;
-            	float newX = 21;
-            	float distanceP =  distance(originX, originY, rayX, rayY);
-            	rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, newX, portalY, infLoopCheck, distanceP, verticalHorizontal);
-            }
-		}
     }
 
-    if (recursiveCallCheck == 0) {
-        if (distanceH < distanceV) {
-            distanceP = distanceH;
-        } else {
-            distanceP = distanceV;
-        }
+    // Determine which hit is closer
+
+    if (distanceV < distanceH) {
+
+        rayX = verticalX;
+        rayY = verticalY;
+        distanceT = (distanceV) * cos(playerAngle - rayAngle);
+        verticalHorizontal = 0; // vertical wall
+    } else {
+
+        rayX = horizontalX;
+        rayY = horizontalY;
+        distanceT = (distanceH) * cos(playerAngle - rayAngle);
+        verticalHorizontal = 1; // horizontal wall
     }
 
-	if (recursiveCallCheck == 0){
-		if (distanceV < distanceH) {
-		   rayX = verticalX;
-		   rayY = verticalY;
-		   distanceT=(distanceV + distanceP) * cos(playerAngle-rayAngle);
-		   verticalHorizontal = 0; // horizontal wall
-		}
-		if (distanceH < distanceV) {
-			rayX = horizontalX;
-			rayY = horizontalY;
-			distanceT=(distanceH + distanceP) * cos(playerAngle-rayAngle);
-			verticalHorizontal = 1; // vertical wall
-		}
-	}
-
+    if (rayX <= -20 || rayX >= 560) { // Handle edges
+        portal = 1;
+    } else {
+        portal = 0;
+    }
 }
 
 void drawRays2d() {
-    int ray, mx, my, mp, dof, infLoopCheck = 0, verticalHorizontal;
-    float rayX, rayY, rayAngle, xo, yo, distanceT = 0, distanceP = 0;
+    int ray, mx, my, mp, dof, verticalHorizontal, portal;
+    float rayX, rayY, rayAngle, xo, yo, distanceT = 0;
     float originX = playerX, originY = playerY;
     rayAngle = playerAngle - DEGREE_FROM_RADIANS * 30;
     if (rayAngle < 0) {
@@ -148,7 +120,7 @@ void drawRays2d() {
     }
 
     for (ray = 0; ray < 120; ray++) {
-        rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, originX, originY, infLoopCheck, distanceP, verticalHorizontal);
+        rayHitMaths(rayX, rayY, rayAngle, xo, yo, distanceT, ray, mx, my, mp, dof, originX, originY, verticalHorizontal, portal);
 
         // Draw rays
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for rays
@@ -163,11 +135,15 @@ void drawRays2d() {
 		if (lineH > 600) lineH = 600;
 		float lineO = 300 - lineH / 2; // Calculate the line offset
 
-		if (verticalHorizontal == 0){ // Set the color 
-			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-		} else {
-			SDL_SetRenderDrawColor(renderer, 0, 0, 230, 255);
-		}
+        if (portal == 0){
+            if (verticalHorizontal == 0){ // Set the color 
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            } else {
+                SDL_SetRenderDrawColor(renderer, 0, 0, 230, 255);
+            }
+        } else { 
+            SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
+        }
 
 		int leftX = ray * 4 + (mapX * mapSize) - 4;
 		int rightX = ray * 4 + (mapX * mapSize) + 4;
