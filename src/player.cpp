@@ -20,8 +20,7 @@ void drawPlayer2d() {
         }
     }
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White
-    SDL_RenderDrawLine(renderer, static_cast<int>(playerX), static_cast<int>(playerY),
-                       static_cast<int>(playerX + playerDX), static_cast<int>(playerY + playerDY));
+    SDL_RenderDrawLine(renderer, static_cast<int>(playerX), static_cast<int>(playerY), static_cast<int>(playerX + playerDX), static_cast<int>(playerY + playerDY));
 }
 
 void updatePlayerPosition() {
@@ -73,4 +72,6 @@ void updatePlayerPosition() {
     } else if ( playerX >= 560) {
         playerX = 1;
     }
+
+    checkAndPickupItem(playerX, playerY, score, boost, boostEndTime);
 }

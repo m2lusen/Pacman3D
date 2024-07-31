@@ -14,7 +14,7 @@ std::vector<int> mapW = {
 	1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,
 	0,0,0,0,0,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,0,0,0,0,0,
 	0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,
-	0,0,0,0,0,1,0,1,1,0,1,1,1,2,2,1,1,1,0,1,1,0,1,0,0,0,0,0,
+	0,0,0,0,0,1,0,1,1,0,1,1,1,0,0,1,1,1,0,1,1,0,1,0,0,0,0,0,
 	1,1,1,1,1,1,0,1,1,0,1,0,0,0,0,0,0,1,0,1,1,0,1,1,1,1,1,1,
 	0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 	1,1,1,1,1,1,0,1,1,0,1,0,0,0,0,0,0,1,0,1,1,0,1,1,1,1,1,1,
@@ -46,15 +46,15 @@ std::vector<int> mapR = {
 	0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,
 	0,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,0,
 	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
-	1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,
-	1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,
-	1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,
+	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
+	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
+	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
 	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
 	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
 	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
-	1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,
-	1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,
-	1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,
+	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
+	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
+	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
 	0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
 	0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,
 	0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,
@@ -73,6 +73,44 @@ int mapX = 28;
 int mapY = 31; 
 int mapSize = 20; 
 
+void drawCoins2d() {
+    for (int y = 0; y < mapY; ++y) {
+        for (int x = 0; x < mapX; ++x) {
+            int centerX = x * mapSize + mapSize / 2; // Calculate the center of the rectangle
+            int centerY = y * mapSize + mapSize / 2; // Calculate the center of the rectangle
+
+            int coinRadius = mapSize / 6;
+			int boostRadius = mapSize / 3;
+
+            if (mapR[y * mapX + x] == 1) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+
+                for (int w = 0; w < coinRadius * 2; ++w) {
+                    for (int h = 0; h < coinRadius * 2; ++h) {
+                        int dx = coinRadius - w;
+                        int dy = coinRadius - h;
+                        if ((dx * dx + dy * dy) <= (coinRadius * coinRadius)) {
+                            SDL_RenderDrawPoint(renderer, centerX + w - coinRadius, centerY + h - coinRadius);
+                        }
+                    }
+                }
+            } else if (mapR[y * mapX + x] == 2) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+
+                for (int w = 0; w < boostRadius * 2; ++w) {
+                    for (int h = 0; h < boostRadius * 2; ++h) {
+                        int dx = boostRadius - w;
+                        int dy = boostRadius - h;
+                        if ((dx * dx + dy * dy) <= (boostRadius * boostRadius)) {
+                            SDL_RenderDrawPoint(renderer, centerX + w - boostRadius, centerY + h - boostRadius);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 void drawMap2d() {
     for (int y = 0; y < mapY; ++y) {
         for (int x = 0; x < mapX; ++x) {
@@ -84,5 +122,24 @@ void drawMap2d() {
             }
             SDL_RenderFillRect(renderer, &tileRect);
         }
+    }
+
+	drawCoins2d();
+}
+
+void checkAndPickupItem(float& playerX, float& playerY, int& score, bool& boost, float& boostEndTime) {
+    int playerMapIndex = (static_cast<int>(playerY) / mapSize) * mapX + (static_cast<int>(playerX) / mapSize);
+
+    if (mapR[playerMapIndex] == 1) {
+        mapR[playerMapIndex] = 0;
+        score += 10;
+    } else if (mapR[playerMapIndex] == 2) {
+        mapR[playerMapIndex] = 0;
+        boost = true;
+        boostEndTime = SDL_GetTicks() + 5000;
+    }
+
+    if (boost && SDL_GetTicks() > boostEndTime) {
+        boost = false;
     }
 }

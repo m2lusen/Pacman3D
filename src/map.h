@@ -8,5 +8,6 @@ extern std::vector<int> mapR;
 extern int mapX, mapY, mapSize; 
 
 void drawMap2d();
+void checkAndPickupItem(float& playerX, float& playerY, int& score, bool& boost, float& boostEndTime);
 
 #endif // MAP_H
